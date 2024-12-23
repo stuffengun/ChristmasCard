@@ -113,11 +113,11 @@
         <div class="controls-container">
             <h2>하트 모양 설정</h2>
             <div>
-                <label for="a-slider-f">f(x) - a:</label>
+                <label for="a-slider-f">f(x)의 기울기:</label>
                 <input type="range" id="a-slider-f" class="slider" min="0.5" max="5" step="0.01" value="0.5" onchange="updateHeart()">
             </div>
             <div>
-                <label for="a-slider-g-h">g(x), h(x) - a:</label>
+                <label for="a-slider-g-h">g'(x), h'(x)의 기울기:</label>
                 <input type="range" id="a-slider-g-h" class="slider" min="-0.2" max="-0.01" step="0.01" value="-0.01" onchange="updateHeart()">
             </div>
             <div>
@@ -125,15 +125,15 @@
                 <input type="range" id="b-slider" class="slider" min="-10" max="10" step="0.1" value="1" onchange="updateHeart()">
             </div>
             <div>
-                <label for="c-slider-f">f(x) - c:</label>
+                <label for="c-slider-f">f(x)의 상수항</label>
                 <input type="range" id="c-slider-f" class="slider" min="-40" max="40" step="0.1" value="0" onchange="updateHeart()">
             </div>
             <div>
-                <label for="c-slider">g(x), h(x) - c:</label>
+                <label for="c-slider">g'(x), h'(x)의 적분상수:</label>
                 <input type="range" id="c-slider" class="slider" min="-40" max="40" step="0.1" value="0" onchange="updateHeart()">
             </div>
             <div>
-                <label for="shift-slider">x 축 평행이동:</label>
+                <label for="shift-slider">좌우 이동하기:</label>
                 <input type="range" id="shift-slider" class="slider" min="-50" max="50" step="0.1" value="0" onchange="updateHeart()">
             </div>
             <div>
@@ -156,8 +156,8 @@
     <script>
         let functions = [
             { name: 'f(x)', a: 0.5, b: 1, c: 0, shift: 0 },
-            { name: 'g(x)', a: -0.01, b: 1, c: 0, shift: 0 },
-            { name: 'h(x)', a: -0.01, b: 1, c: 0, shift: 0 }
+            { name: 'g\'(x)', a: -0.01, b: 1, c: 0, shift: 0 },
+            { name: 'h\'(x)', a: -0.01, b: 1, c: 0, shift: 0 }
         ];
         let selectedFunctionIndex = 0;
         let backgroundColor = '#088A29';
@@ -249,7 +249,7 @@
 
             functions.forEach((func, index) => {
                 const li = document.createElement('li');
-                li.textContent = func.name === 'f(x)' ? `f(x) = |${func.a}(x - ${func.shift}) - ${func.b}| + ${func.c}` : `${func.name} = ${func.a}x² + ${func.b}x + ${func.c}`;
+                li.textContent = func.name === 'f(x)' ? `f(x) = |${func.a}(x - ${func.shift}) - ${func.b}| + ${func.c}` : `${func.name} = ${func.a*2}x + ${func.b}`;
                 li.classList.toggle('active', index === selectedFunctionIndex);
                 li.onclick = () => selectFunction(index);
                 list.appendChild(li);
