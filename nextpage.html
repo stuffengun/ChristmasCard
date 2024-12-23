@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>하트 크리스마스 카드 텍스트 추가</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Jua', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f8ff;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .text-input {
+            position: absolute;
+            bottom: 10px;
+            width: 90%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .button-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .button {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #ff6f61;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            margin: 10px;
+        }
+
+        .button:hover {
+            background-color: #ff4b3e;
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-container">
+        <canvas id="heartCanvas" width="500" height="500"></canvas>
+        <textarea id="textInput" class="text-input" placeholder="여기에 텍스트를 입력하세요..." rows="4"></textarea>
+    </div>
+
+    <div class="button-container">
+        <button class="button" id="downloadButton">다운로드</button>
+        <button class="button" id="goToHomeButton">처음으로</button>
+    </div>
+
+    <script>
+        window.onload = function() {
+            const canvas = document.getElementById('heartCanvas');
+            const ctx = canvas.getContext('2d');
+            const imgData = localStorage.getItem('heartImage');
+
+            const heartImage = new Image();
+            heartImage.src = imgData;
+
+            heartImage.onload = function() {
+                ctx.drawImage(heartImage, 0, 0);
+            };
+
+            const textInput = document.getElementById('textInput');
+            textInput.addEventListener('input', function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // 기존 캔버스를 지운 후
+                ctx.drawImage(heartImage, 0, 0); // 이미지를 다시 그립니다.
+
+                const text = textInput.value;
+                ctx.font = '20px Jua, sans-serif';
+                ctx.fillStyle = '#F7F8E0'; // 텍스트 색상 변경
+
+                // 텍스트를 여러 줄로 처리하기 위한 로직
+                const lines = text.split('\n');
+                let yPosition = 20;
+
+                lines.forEach(line => {
+                    ctx.fillText(line, 20, yPosition);
+                    yPosition += 30; // 줄 간격 조정
+                });
+            });
+
+            // 다운로드 버튼 클릭 시
+            document.getElementById('downloadButton').addEventListener('click', function() {
+                const dataURL = canvas.toDataURL('image/png'); // 캔버스를 이미지로 변환
+                const link = document.createElement('a');
+                link.href = dataURL;
+                link.download = 'heart_card.png'; // 다운로드할 파일 이름
+                link.click();
+            });
+
+            // 처음으로 버튼 클릭 시
+            document.getElementById('goToHomeButton').addEventListener('click', function() {
+                window.location.href = 'index.html'; // 같은 폴더 내 index.html로 이동
+            });
+        };
+    </script>
+</body>
+</html>

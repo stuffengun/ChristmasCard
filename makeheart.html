@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>하트 크리스마스 카드 만들기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Jua', sans-serif;
+            background-color: #f0f8ff;
+        }
+
+        .container {
+            display: flex;
+            width: 80%;
+        }
+
+        .canvas-container {
+            flex: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls-container {
+            flex: 1;
+            margin-left: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .function-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .function-list li {
+            cursor: pointer;
+            padding: 5px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .function-list li.active {
+            color: red;
+            background-color: #f0f8ff;
+        }
+
+        .add-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #ff6f61;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-button:hover {
+            background-color: #ff4b3e;
+        }
+
+        .color-button-container {
+            margin-top: 10px;
+        }
+
+        .color-button {
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-right: 10px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .color-button.green {
+            background-color: #088A29;
+        }
+
+        .color-button.red {
+            background-color: #B40404;
+        }
+
+        .color-button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="canvas-container">
+            <canvas id="heartCanvas" width="500" height="500"></canvas>
+        </div>
+        <div class="controls-container">
+            <h2>하트 모양 설정</h2>
+            <div>
+                <label for="a-slider-f">f(x) - a:</label>
+                <input type="range" id="a-slider-f" class="slider" min="0.5" max="5" step="0.01" value="0.5" onchange="updateHeart()">
+            </div>
+            <div>
+                <label for="a-slider-g-h">g(x), h(x) - a:</label>
+                <input type="range" id="a-slider-g-h" class="slider" min="-0.2" max="-0.01" step="0.01" value="-0.01" onchange="updateHeart()">
+            </div>
+            <div>
+                <label for="b-slider">b:</label>
+                <input type="range" id="b-slider" class="slider" min="-10" max="10" step="0.1" value="1" onchange="updateHeart()">
+            </div>
+            <div>
+                <label for="c-slider-f">f(x) - c:</label>
+                <input type="range" id="c-slider-f" class="slider" min="-40" max="40" step="0.1" value="0" onchange="updateHeart()">
+            </div>
+            <div>
+                <label for="c-slider">g(x), h(x) - c:</label>
+                <input type="range" id="c-slider" class="slider" min="-40" max="40" step="0.1" value="0" onchange="updateHeart()">
+            </div>
+            <div>
+                <label for="shift-slider">x 축 평행이동:</label>
+                <input type="range" id="shift-slider" class="slider" min="-50" max="50" step="0.1" value="0" onchange="updateHeart()">
+            </div>
+            <div>
+                <label for="width-slider">굵기:</label>
+                <input type="range" id="width-slider" class="slider" min="1" max="10" step="1" value="1" onchange="updateHeart()">
+            </div>
+            <ul id="function-list" class="function-list">
+                <li id="function-f" onclick="selectFunction(0)">f(x) = |ax - b| + c</li>
+                <li id="function-g" onclick="selectFunction(1)">g(x) = ax² + bx + c</li>
+                <li id="function-h" onclick="selectFunction(2)">h(x) = ax² + bx + c</li>
+            </ul>
+            <div class="color-button-container">
+                <button class="color-button green" onclick="changeBackgroundColor('#088A29')">초록색</button>
+                <button class="color-button red" onclick="changeBackgroundColor('#B40404')">빨간색</button>
+            </div>
+            <button class="add-button" onclick="saveCanvas()">완성하기</button>
+        </div>
+    </div>
+
+    <script>
+        let functions = [
+            { name: 'f(x)', a: 0.5, b: 1, c: 0, shift: 0 },
+            { name: 'g(x)', a: -0.01, b: 1, c: 0, shift: 0 },
+            { name: 'h(x)', a: -0.01, b: 1, c: 0, shift: 0 }
+        ];
+        let selectedFunctionIndex = 0;
+        let backgroundColor = '#088A29';
+
+        function drawHeart(ctx, func, lineWidth) {
+            ctx.beginPath();
+            ctx.lineWidth = lineWidth;
+            ctx.strokeStyle = "#F7F8E0";
+            const a = func.a;
+            const b = func.b;
+            const c = func.c;
+            const shift = func.shift;
+
+            for (let x = -50; x <= 50; x += 0.01) {
+                let y;
+                if (func.name === 'f(x)') {
+                    y = Math.abs(a * (x - shift) - b) + c;
+                } else {
+                    y = a * Math.pow(x - shift, 2) + b * (x - shift) + c;
+                }
+
+                if (x === -50) {
+                    ctx.moveTo(250 + x * 5, 250 - y * 5);
+                } else {
+                    ctx.lineTo(250 + x * 5, 250 - y * 5);
+                }
+            }
+            ctx.stroke();
+        }
+
+        function updateHeart() {
+            if (selectedFunctionIndex === -1) return;
+
+            const a = selectedFunctionIndex === 0 ? parseFloat(document.getElementById('a-slider-f').value) : parseFloat(document.getElementById('a-slider-g-h').value);
+            const b = parseFloat(document.getElementById('b-slider').value);
+            const c = selectedFunctionIndex === 0 ? parseFloat(document.getElementById('c-slider-f').value) : parseFloat(document.getElementById('c-slider').value);
+            const shift = parseFloat(document.getElementById('shift-slider').value);
+            const lineWidth = parseFloat(document.getElementById('width-slider').value);
+
+            functions[selectedFunctionIndex] = { ...functions[selectedFunctionIndex], a, b, c, shift };
+
+            const ctx = document.getElementById('heartCanvas').getContext('2d');
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            ctx.fillStyle = backgroundColor;
+            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            functions.forEach(func => drawHeart(ctx, func, lineWidth));
+
+            updateFunctionList();
+        }
+
+        function selectFunction(index) {
+            selectedFunctionIndex = index;
+
+            const aSliderF = document.getElementById('a-slider-f');
+            const aSliderGH = document.getElementById('a-slider-g-h');
+            const bSlider = document.getElementById('b-slider');
+            const cSliderF = document.getElementById('c-slider-f');
+            const cSlider = document.getElementById('c-slider');
+            const shiftSlider = document.getElementById('shift-slider');
+
+            if (index === 0) {
+                aSliderF.value = functions[0].a;
+                cSliderF.value = functions[0].c;
+                aSliderF.disabled = false;
+                cSliderF.disabled = false;
+                aSliderGH.disabled = true;
+                cSlider.disabled = true;
+            } else {
+                aSliderGH.value = functions[index].a;
+                cSlider.value = functions[index].c;
+                aSliderGH.disabled = false;
+                cSlider.disabled = false;
+                aSliderF.disabled = true;
+                cSliderF.disabled = true;
+            }
+
+            bSlider.value = functions[index].b;
+            shiftSlider.value = functions[index].shift;
+
+            updateHeart();
+            updateFunctionList();
+        }
+
+        function updateFunctionList() {
+            const list = document.getElementById('function-list');
+            list.innerHTML = '';
+
+            functions.forEach((func, index) => {
+                const li = document.createElement('li');
+                li.textContent = func.name === 'f(x)' ? `f(x) = |${func.a}(x - ${func.shift}) - ${func.b}| + ${func.c}` : `${func.name} = ${func.a}x² + ${func.b}x + ${func.c}`;
+                li.classList.toggle('active', index === selectedFunctionIndex);
+                li.onclick = () => selectFunction(index);
+                list.appendChild(li);
+            });
+        }
+
+        function changeBackgroundColor(color) {
+            backgroundColor = color;
+            updateHeart();
+        }
+
+        function saveCanvas() {
+            const canvas = document.getElementById('heartCanvas');
+            const dataURL = canvas.toDataURL('image/png');
+            localStorage.setItem('heartImage', dataURL);
+            window.location.href = 'nextpage.html'; // 다음 페이지로 이동
+        }
+
+        window.onload = function() {
+            selectFunction(0);
+            updateHeart();
+        };
+    </script>
+</body>
+
+</html>
